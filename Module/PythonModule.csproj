@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A0084F22-B436-4068-8F18-EC182EE78927}</ProjectGuid>
+    <ProjectGuid>{4A1DEA51-60CD-4358-9D52-465A3841E3B1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NewModule</RootNamespace>
-    <AssemblyName>NewModule</AssemblyName>
+    <RootNamespace>GoodAI.PythonModule</RootNamespace>
+    <AssemblyName>GoodAI.PythonModule</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -33,24 +33,30 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="GoodAI.Platform.Core">
-      <HintPath>C:\Program Files\GoodAI\Brain Simulator\GoodAI.Platform.Core.dll</HintPath>
+      <HintPath>..\..\..\Platform\Core\bin\Debug\GoodAI.Platform.Core.dll</HintPath>
     </Reference>
+    <Reference Include="IronPython, Version=2.7.5.0, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL" />
     <Reference Include="ManagedCuda, Version=7.0.27.0, Culture=neutral, PublicKeyToken=242d898828717aa0, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\GoodAI\Brain Simulator\ManagedCuda.dll</HintPath>
+      <HintPath>..\..\..\..\BinaryLibs\GoodAiPlatformLibs\ManagedCuda\ManagedCuda.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Scripting, Version=1.1.0.20, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Design" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Drawing.Design" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="YAXLib">
-      <HintPath>C:\Program Files\GoodAI\Brain Simulator\YAXLib.dll</HintPath>
+      <HintPath>..\..\..\..\BinaryLibs\GoodAiPlatformLibs\YAXLib\YAXLib.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MyPythonNode.cs" />
     <Compile Include="Versioning\MyConversion.cs" />
     <Compile Include="SomeNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -63,7 +69,13 @@
   <ItemGroup>
     <EmbeddedResource Include="conf\doc.xml" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="post_build.cmd" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>"$(ProjectDir)post_build.cmd" "$(SolutionDir)" "$(ProjectDir)" "$(OutDir)" "$(Configuration)"</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
