@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Configuration  RootNamespace="NewModule">
   <KnownNodes>
-    <Node type="PythonModule.MyPythonNode" CanBeAdded="true"/>
-    <Node type="NewModule.SomeNode" CanBeAdded="true" ><!--BigIcon="_big.png" SmallIcon=".png"> -->
-      <!--<Observer type="" />-->
-    </Node>
+    <Node type="GoodAI.Modules.PythonModule.MyPythonNode" CanBeAdded="true"/>
   </KnownNodes>
 </Configuration>

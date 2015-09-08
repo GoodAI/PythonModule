@@ -14,7 +14,7 @@ using System.Drawing.Design;
 using System.Drawing;
 using IronPython.Hosting;
 
-namespace PythonModule
+namespace GoodAI.Modules.PythonModule
 {
     /// <summary>Initialization.</summary>
     [Description("Initialization."), MyTaskInfo(OneShot = true)]
@@ -42,7 +42,7 @@ namespace PythonModule
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Python Error: Unable to run script [" + Owner.ScriptFile + "]: " + ex.Message);
+                MyLog.ERROR.WriteLine("Python Error: Unable to run script [" + Owner.ScriptFile + "]: " + ex.Message);
             }
 
             //assign all to owner
@@ -57,7 +57,7 @@ namespace PythonModule
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Python Error: Unable to call Init() [" + Owner.ScriptFile + "]: " + ex.Message);
+                MyLog.ERROR.WriteLine("Python Error: Unable to call Init() [" + Owner.ScriptFile + "]: " + ex.Message);
             }
         }
     }
@@ -104,52 +104,16 @@ namespace PythonModule
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Python Error: Unable to call Execute() [" + Owner.ScriptFile + "]: " + ex.Message);
+                MyLog.ERROR.WriteLine("Python Error: Unable to call Execute() [" + Owner.ScriptFile + "]: " + ex.Message);
             }
 
-            //TODO: test it!!
-            //float[][] output = new float[Owner.OutputBranches][];
+            //send data to device
             for (int i = 0; i < Owner.OutputBranches; ++i)
             {
                 var host = Owner.GetOutput(i);
 
                 host.SafeCopyToDevice();
-                //input[i] = host.Host;
             }
-
-
-            /* var py = Python.CreateEngine();
-            var scope = py.CreateScope();
-            scope.SetVariable("prom1", 11);
-            List<int> l1 = new List<int> {31,32,33};
-            float[] f1 = new float[] { 1.1f, 2.2f, 3.3f};
-
-            scope.SetVariable("list1", l1);
-            scope.SetVariable("listf1", f1);
-
-            var py = Python.CreateEngine();
-            var scriptSource = py.CreateScriptSourceFromString(script);
-
-            try
-            {
-                scriptSource.Execute(scope);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(
-                   "Oops! We couldn't print your message because of an exception: " + ex.Message);
-            }*/
-/*
-            Owner.m_Data = new My2DDatabase.Data [Owner.Size, Owner.Size];
-            Owner.m_UnsortedData = new List<float[]>();
-
-            if (Owner.Value != null)
-            {
-                Owner.Value.Fill(0);
-            }
-
-            Owner.Cover2D.Fill(0);
- * */
         }
     }
 
@@ -298,33 +262,29 @@ namespace PythonModule
         public override void UpdateMemoryBlocks()
         {
             UpdateOutputBlocks();
-
-            /*//column hint update
-            for (int i = 0; i < OutputBranches; i++)
-            {
-                MyMemoryBlock<float> mb = GetOutput(i);
-
-                if (Input != null && mb.Count > Input.ColumnHint)
-                {
-                    mb.ColumnHint = Input.ColumnHint;
-                }
-            }*/
         }
 
 
         public override void Validate(MyValidator validator)
         {
-            //validator.AssertError(InputBranches == 2, this, "Two operands are needed for distance measures");
-
         }
 
-        /*public override string Description
+        public override string Description
         {
             get
             {
-                return Operation.ToString();
+                if(ScriptFile.Length > 0)
+                {
+                    string[] s = ScriptFile.Split('\\');
+
+                    return s[s.Length-1];
+                }
+                else
+                {
+                    return "no script!";
+                }
             }
-        }*/
+        }
     }
 }
     
