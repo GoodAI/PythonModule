@@ -20,6 +20,10 @@ namespace GoodAI.Modules.PythonModule
     [Description("Initialization."), MyTaskInfo(OneShot = true)]
     public class InitTask : MyTask<MyPythonNode>
     {
+        [MyBrowsable, Category("Behavior")]
+        [YAXSerializableField(DefaultValue = ""), YAXElementFor("Behavior")]
+        public string Settings { get; set; }
+
         public override void Init(int nGPU)
         {
         }
@@ -35,6 +39,19 @@ namespace GoodAI.Modules.PythonModule
             //create default scope
             var scope = engine.CreateScope();
 
+            //set global blackboard to each instance of script-node
+            scope.SetVariable("Blackboard", MyPythonNode.m_Blackboard);
+            
+            //run setting-script with scope to set initial data
+            try
+            {
+                engine.Execute(Settings, scope);
+            }
+            catch (Exception ex)
+            {
+                MyLog.WARNING.WriteLine("Python: Unable to execute settings [" + Settings + "]: " + ex.Message);
+            }
+
             //run script with scope to load all needed methods
             try
             {
@@ -42,11 +59,8 @@ namespace GoodAI.Modules.PythonModule
             }
             catch (Exception ex)
             {
-                MyLog.ERROR.WriteLine("Python Error: Unable to run script [" + Owner.ScriptFile + "]: " + ex.Message);
+                MyLog.WARNING.WriteLine("Python: Unable to run script [" + Owner.ScriptFile + "]: " + ex.Message);
             }
-
-            //set global blackboard to each instance of script-node
-            scope.SetVariable("Blackboard", MyPythonNode.m_Blackboard);
             
             //assign all to owner
             Owner.m_PythonEngine = engine;
@@ -60,7 +74,7 @@ namespace GoodAI.Modules.PythonModule
             }
             catch (Exception ex)
             {
-                MyLog.ERROR.WriteLine("Python Error: Unable to call Init() [" + Owner.ScriptFile + "]: " + ex.Message);
+                MyLog.WARNING.WriteLine("Python: Error while calling Init() [" + Owner.ScriptFile + "]: " + ex.Message);
             }
         }
     }
@@ -107,7 +121,7 @@ namespace GoodAI.Modules.PythonModule
             }
             catch (Exception ex)
             {
-                MyLog.ERROR.WriteLine("Python Error: Unable to call Execute() [" + Owner.ScriptFile + "]: " + ex.Message);
+                MyLog.WARNING.WriteLine("Python: Error while calling Execute() [" + Owner.ScriptFile + "]: " + ex.Message);
             }
 
             //send data to device
