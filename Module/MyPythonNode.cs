@@ -45,6 +45,9 @@ namespace GoodAI.Modules.PythonModule
                 MyLog.ERROR.WriteLine("Python Error: Unable to run script [" + Owner.ScriptFile + "]: " + ex.Message);
             }
 
+            //set global blackboard to each instance of script-node
+            scope.SetVariable("Blackboard", MyPythonNode.m_Blackboard);
+            
             //assign all to owner
             Owner.m_PythonEngine = engine;
             Owner.m_ScriptSource = source;
@@ -130,6 +133,9 @@ namespace GoodAI.Modules.PythonModule
         public Microsoft.Scripting.Hosting.ScriptSource m_ScriptSource;
         public Microsoft.Scripting.Hosting.ScriptScope m_ScriptScope;
 
+        //global comunucation channel between python-scipt nodes
+        public static IronPython.Runtime.PythonDictionary m_Blackboard;
+
         //Tasks
         protected InitTask initTask { get; set; }
         protected ExecuteTask executeTask { get; set; }
@@ -158,6 +164,11 @@ namespace GoodAI.Modules.PythonModule
         public MyPythonNode()
         {
             InputBranches = 1;
+
+            if(m_Blackboard == null)
+            {
+                m_Blackboard = new IronPython.Runtime.PythonDictionary();
+            }
         }
 
         public int Input0Count { get { return GetInput(0) != null ? GetInput(0).Count : 0; } }
