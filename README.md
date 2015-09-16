@@ -2,8 +2,8 @@
  - GoodAI Brain Simulator module that provides PythonNode for executing python scripts
 
 #Prerequisities
- - PythonTools for Visual Studio
- - IronPython
+ - [PythonTools for Visual Studio](http://microsoft.github.io/PTVS/)
+ - [IronPython](http://ironpython.net/)
 
 #PythonNode
  - variable number of inputs (consistent with JoinNode)
