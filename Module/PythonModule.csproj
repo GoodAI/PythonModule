@@ -58,7 +58,6 @@
   <ItemGroup>
     <Compile Include="MyPythonNode.cs" />
     <Compile Include="Versioning\MyConversion.cs" />
-    <Compile Include="SomeNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
