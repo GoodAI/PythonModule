@@ -26,6 +26,11 @@ namespace GoodAI.Modules.PythonModule
 
         public override void Init(int nGPU)
         {
+            //global blackboard reset
+            if (MyPythonNode.m_Blackboard == null)
+            {
+                MyPythonNode.m_Blackboard = new IronPython.Runtime.PythonDictionary();
+            }
         }
 
         public override void Execute()
@@ -178,11 +183,11 @@ namespace GoodAI.Modules.PythonModule
         public MyPythonNode()
         {
             InputBranches = 1;
+        }
 
-            if(m_Blackboard == null)
-            {
-                m_Blackboard = new IronPython.Runtime.PythonDictionary();
-            }
+        public override void Cleanup()
+        {
+            m_Blackboard = null;
         }
 
         public int Input0Count { get { return GetInput(0) != null ? GetInput(0).Count : 0; } }
