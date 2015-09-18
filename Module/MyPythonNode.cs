@@ -13,6 +13,8 @@ using System.Windows.Forms.Design;
 using System.Drawing.Design;
 using System.Drawing;
 using IronPython.Hosting;
+using Microsoft.Scripting.Hosting;
+using IronPython.Runtime;
 
 namespace GoodAI.Modules.PythonModule
 {
@@ -39,7 +41,7 @@ namespace GoodAI.Modules.PythonModule
             var engine = Python.CreateEngine();
 
             //load script
-            var source = engine.CreateScriptSourceFromFile(Owner.ScriptFile);
+            var source = engine.CreateScriptSourceFromString(Owner.Script);
 
             //create default scope
             var scope = engine.CreateScope();
@@ -64,7 +66,7 @@ namespace GoodAI.Modules.PythonModule
             }
             catch (Exception ex)
             {
-                MyLog.WARNING.WriteLine("Python: Unable to run script [" + Owner.ScriptFile + "]: " + ex.Message);
+                MyLog.WARNING.WriteLine("Python: Unable to run script [" + Owner.Name + "]: " + ex.Message);
             }
             
             //assign all to owner
@@ -79,7 +81,7 @@ namespace GoodAI.Modules.PythonModule
             }
             catch (Exception ex)
             {
-                MyLog.WARNING.WriteLine("Python: Error while calling Init() [" + Owner.ScriptFile + "]: " + ex.Message);
+                MyLog.WARNING.WriteLine("Python: Error while calling Init() [" + Owner.Name + "]: " + ex.Message);
             }
         }
     }
@@ -126,7 +128,7 @@ namespace GoodAI.Modules.PythonModule
             }
             catch (Exception ex)
             {
-                MyLog.WARNING.WriteLine("Python: Error while calling Execute() [" + Owner.ScriptFile + "]: " + ex.Message);
+                MyLog.WARNING.WriteLine("Python: Error while calling Execute() [" + Owner.Name + "]: " + ex.Message);
             }
 
             //send data to device
@@ -146,28 +148,18 @@ namespace GoodAI.Modules.PythonModule
     ///   Wraps python-language to the node
     /// </summary>
     /// <description>.</description>
-    public class MyPythonNode : MyWorkingNode, IMyVariableBranchViewNodeBase
+    public class MyPythonNode : MyScriptableNode, IMyVariableBranchViewNodeBase
     {
-        public Microsoft.Scripting.Hosting.ScriptEngine m_PythonEngine;
-        public Microsoft.Scripting.Hosting.ScriptSource m_ScriptSource;
-        public Microsoft.Scripting.Hosting.ScriptScope m_ScriptScope;
+        public ScriptEngine m_PythonEngine;
+        public ScriptSource m_ScriptSource;
+        public ScriptScope m_ScriptScope;
 
         //global comunucation channel between python-scipt nodes
-        public static IronPython.Runtime.PythonDictionary m_Blackboard;
+        public static PythonDictionary m_Blackboard;
 
         //Tasks
         protected InitTask initTask { get; set; }
         protected ExecuteTask executeTask { get; set; }
-
-
-        [MyBrowsable, Category("Behaviour")]
-        [YAXSerializableField(DefaultValue = ""), YAXElementFor("Structure")]
-        [EditorAttribute(typeof(FileNameEditor), typeof(UITypeEditor))]
-        public string ScriptFile {set; get;}
-        /*{
-            get { return ""; }
-            set { if (Owner != null) Owner.Save(value); }
-        }*/
 
         [ReadOnly(false)]
         [YAXSerializableField, YAXElementFor("IO")]
@@ -297,23 +289,7 @@ namespace GoodAI.Modules.PythonModule
 
         public override void Validate(MyValidator validator)
         {
-        }
 
-        public override string Description
-        {
-            get
-            {
-                if(ScriptFile.Length > 0)
-                {
-                    string[] s = ScriptFile.Split('\\');
-
-                    return s[s.Length-1];
-                }
-                else
-                {
-                    return "no script!";
-                }
-            }
         }
     }
 }
