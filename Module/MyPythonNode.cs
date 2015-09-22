@@ -172,6 +172,16 @@ namespace GoodAI.Modules.PythonModule
             }
         }
 
+        public override string NameExpressions
+        {
+            get { return "Blackboard Input Output"; }
+        }
+
+        public override string Keywords
+        {
+            get { return "and as assert break class continue def del elif else except exec finally for from global if import in is lambda not or pass print raise return try while with yield"; }
+        }
+
         public MyPythonNode()
         {
             InputBranches = 1;
