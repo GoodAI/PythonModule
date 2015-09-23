@@ -182,6 +182,11 @@ namespace GoodAI.Modules.PythonModule
             get { return "and as assert break class continue def del elif else except exec finally for from global if import in is lambda not or pass print raise return try while with yield"; }
         }
 
+        public override string Language
+        {
+            get { return "Python"; }
+        }
+
         public MyPythonNode()
         {
             InputBranches = 1;
