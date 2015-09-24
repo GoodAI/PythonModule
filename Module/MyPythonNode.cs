@@ -48,6 +48,7 @@ namespace GoodAI.Modules.PythonModule
 
             //set global blackboard to each instance of script-node
             scope.SetVariable("Blackboard", MyPythonNode.m_Blackboard);
+            scope.SetVariable("NodeName", Owner.Name);
             
             //run setting-script with scope to set initial data
             try
@@ -174,7 +175,7 @@ namespace GoodAI.Modules.PythonModule
 
         public override string NameExpressions
         {
-            get { return "Blackboard Input Output"; }
+            get { return "Blackboard Input Output NodeName"; }
         }
 
         public override string Keywords
@@ -190,6 +191,7 @@ namespace GoodAI.Modules.PythonModule
         public MyPythonNode()
         {
             InputBranches = 1;
+            Script = EXAMPLE_CODE;
         }
 
         public override void Cleanup()
@@ -306,6 +308,19 @@ namespace GoodAI.Modules.PythonModule
         {
 
         }
+
+        #region ExampleCode
+        private const string EXAMPLE_CODE = @"import math
+def Init():
+    print ""Init called""
+
+def Execute():
+    #global Blackboard
+    print ""Execute called""
+
+    Output[0] = math.cos(Input[0])
+";
+        #endregion
     }
 }
     
