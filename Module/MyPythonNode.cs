@@ -41,7 +41,9 @@ namespace GoodAI.Modules.PythonModule
             var engine = Python.CreateEngine();
 
             //load script
-            var source = engine.CreateScriptSourceFromString(Owner.Script);
+            var source = string.IsNullOrWhiteSpace(Owner.ExternalScript)
+                ? engine.CreateScriptSourceFromString(Owner.Script)
+                : engine.CreateScriptSourceFromFile(Owner.ExternalScript);
 
             //create default scope
             var scope = engine.CreateScope();
@@ -162,6 +164,18 @@ namespace GoodAI.Modules.PythonModule
         protected InitTask initTask { get; set; }
         protected ExecuteTask executeTask { get; set; }
 
+        private string m_ExternalScript;
+
+        [MyBrowsable, Category("Behaviour")]
+        [YAXSerializableField(DefaultValue = ""), YAXElementFor("Structure")]
+        [EditorAttribute(typeof(FileNameEditor), typeof(UITypeEditor))]
+        public string ExternalScript
+        {
+            set { m_ExternalScript = value; UpdateCaption(); }
+            get { return m_ExternalScript;  }
+        }
+
+
         [ReadOnly(false)]
         [YAXSerializableField, YAXElementFor("IO")]
         public override int InputBranches
@@ -192,6 +206,7 @@ namespace GoodAI.Modules.PythonModule
         {
             InputBranches = 1;
             Script = EXAMPLE_CODE;
+            UpdateCaption();
         }
 
         public override void Cleanup()
@@ -307,6 +322,35 @@ namespace GoodAI.Modules.PythonModule
         public override void Validate(MyValidator validator)
         {
 
+        }
+
+        string m_Caption;
+
+        public override string Caption
+        {
+            get { return string.IsNullOrWhiteSpace(ExternalScript) ? Name : Name + "(not executed)"; }
+        }
+
+        public void UpdateCaption()
+        {
+            m_Caption = string.IsNullOrWhiteSpace(ExternalScript) ? Name : Name + "(not executed)";
+        }
+
+        public override string Description
+        {
+            get
+            {
+                if (!string.IsNullOrWhiteSpace(ExternalScript))
+                {
+                    string[] s = ExternalScript.Split('\\');
+
+                    return s[s.Length - 1];
+                }
+                else
+                {
+                    return "";
+                }
+            }
         }
 
         #region ExampleCode
