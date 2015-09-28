@@ -171,7 +171,7 @@ namespace GoodAI.Modules.PythonModule
         [EditorAttribute(typeof(FileNameEditor), typeof(UITypeEditor))]
         public string ExternalScript
         {
-            set { m_ExternalScript = value; UpdateCaption(); }
+            set { m_ExternalScript = value; }
             get { return m_ExternalScript;  }
         }
 
@@ -206,7 +206,6 @@ namespace GoodAI.Modules.PythonModule
         {
             InputBranches = 1;
             Script = EXAMPLE_CODE;
-            UpdateCaption();
         }
 
         public override void Cleanup()
@@ -322,18 +321,6 @@ namespace GoodAI.Modules.PythonModule
         public override void Validate(MyValidator validator)
         {
 
-        }
-
-        string m_Caption;
-
-        public override string Caption
-        {
-            get { return string.IsNullOrWhiteSpace(ExternalScript) ? Name : Name + "(not executed)"; }
-        }
-
-        public void UpdateCaption()
-        {
-            m_Caption = string.IsNullOrWhiteSpace(ExternalScript) ? Name : Name + "(not executed)";
         }
 
         public override string Description
