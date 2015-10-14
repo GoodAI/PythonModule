@@ -19,7 +19,7 @@ using IronPython.Runtime;
 namespace GoodAI.Modules.PythonModule
 {
     /// <summary>Initialization.</summary>
-    [Description("Initialization."), MyTaskInfo(OneShot = true)]
+    [Description("Python-Script Init"), MyTaskInfo(OneShot = true)]
     public class InitTask : MyTask<MyPythonNode>
     {
         [MyBrowsable, Category("Behavior")]
@@ -92,7 +92,7 @@ namespace GoodAI.Modules.PythonModule
     }
 
     /// <summary>Execution.</summary>
-    [Description("Python execution"), MyTaskInfo(OneShot = false)]
+    [Description("Python-Script execute"), MyTaskInfo(OneShot = false)]
     public class ExecuteTask : MyTask<MyPythonNode>
     {
         public override void Init(int nGPU)
