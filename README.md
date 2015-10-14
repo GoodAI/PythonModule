@@ -9,19 +9,24 @@
  - variable number of inputs (consistent with JoinNode)
  - variable number and sizes of outputs (consistent with ForkNode)
  - user-defined python script
-  - Init()
-    - is called in the begining. Here we do not have any data yet.
-  - Execute()
+  - Settings (optional)
+    - property of Python-Script-Init task
+    - is executed once before Init()
+    - can be used for node-specific task, like node identification
+     - e.g. put in Settings [myNodeId=3] and then you can read it as a global variable in Init() or Execute()
+  - Init() (mandatory)
+    - method that is mandatory
+    - is called once in the begining
+    - can access Blackboard variable
+    - can read NodeName variable
+  - Execute() (mandatory)
     - is called repeatedly in each BrainSimulator iteration to transform inputs to outputs.
-    - can access two lists of lists of floats called Input and Output.
-    - should not change their dimensions of Input and Output!
-  - see example below
-
+    - can access Input - list of vectors of float - do not resize them!
+    - can access Output - list of vectors of float - do not resize them!
+    - can access Blackboard variable
+    - can read NodeName variable
 
 #Simple PythonNode example
  - add PythonNode into project
- - in Node Properties
-  - Set desired number of Inputs/Outputs (InputBranches/OutputbranchSpec)
-  - Set ScriptFile to test.py (it is part of the module)
-   - this script sums all inputs and set the sum to all outputs
- - connect some random inputs and run it
+ - double-click on it to open internal script-editor and see example code there
+ - enjoy
