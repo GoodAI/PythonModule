@@ -42,7 +42,7 @@ namespace GoodAI.Modules.PythonModule
 
             //load script
             var source = string.IsNullOrWhiteSpace(Owner.ExternalScript)
-                ? engine.CreateScriptSourceFromString(Owner.Script)
+                ? engine.CreateScriptSourceFromString(Owner.Script, Owner.Name)
                 : engine.CreateScriptSourceFromFile(Owner.ExternalScript);
 
             //create default scope
@@ -51,15 +51,19 @@ namespace GoodAI.Modules.PythonModule
             //set global blackboard to each instance of script-node
             scope.SetVariable("Blackboard", MyPythonNode.m_Blackboard);
             scope.SetVariable("NodeName", Owner.Name);
-            
+
+            Owner.m_PythonEngine = engine;
+            Owner.m_ScriptSource = source;
+
             //run setting-script with scope to set initial data
             try
             {
-                engine.Execute(Settings, scope);
+                var settingSource = engine.CreateScriptSourceFromString(Settings, "Settings");
+                settingSource.Execute(scope);
             }
             catch (Exception ex)
             {
-                MyLog.WARNING.WriteLine("Python: Unable to execute settings [" + Settings + "]: " + ex.Message);
+                MyLog.WARNING.WriteLine(Owner.ExceptionInfo(ex));
             }
 
             //run script with scope to load all needed methods
@@ -69,22 +73,20 @@ namespace GoodAI.Modules.PythonModule
             }
             catch (Exception ex)
             {
-                MyLog.WARNING.WriteLine("Python: Unable to run script [" + Owner.Name + "]: " + ex.Message);
+                MyLog.WARNING.WriteLine(Owner.ExceptionInfo(ex));
             }
             
-            //assign all to owner
-            Owner.m_PythonEngine = engine;
-            Owner.m_ScriptSource = source;
             Owner.m_ScriptScope = scope;
 
             //call init
             try
             {
-                engine.Execute(@"Init()", scope);
+                var initSource = engine.CreateScriptSourceFromString(@"Init()", @"Init()");
+                initSource.Execute(scope);
             }
             catch (Exception ex)
             {
-                MyLog.WARNING.WriteLine("Python: Error while calling Init() [" + Owner.Name + "]: " + ex.Message);
+                MyLog.WARNING.WriteLine(Owner.ExceptionInfo(ex));
             }
         }
     }
@@ -127,11 +129,12 @@ namespace GoodAI.Modules.PythonModule
             //call Execute()
             try
             {
-                engine.Execute(@"Execute()", scope);
+                var executeSource = engine.CreateScriptSourceFromString(@"Execute()", @"Execute()");
+                executeSource.Execute(scope);
             }
             catch (Exception ex)
             {
-                MyLog.WARNING.WriteLine("Python: Error while calling Execute() [" + Owner.Name + "]: " + ex.Message);
+                MyLog.WARNING.WriteLine(Owner.ExceptionInfo(ex));
             }
 
             //send data to device
@@ -211,6 +214,35 @@ namespace GoodAI.Modules.PythonModule
         public override void Cleanup()
         {
             m_Blackboard = null;
+        }
+
+        public string ExceptionInfo(Exception ex)
+        {
+            string res = "";
+
+            if (m_PythonEngine != null)
+            {
+                res = m_PythonEngine.GetService<ExceptionOperations>().FormatException(ex);
+
+                string parent = "";
+                MyNodeGroup p = Parent;
+                while (p != null)
+                {
+                    if (parent != "")
+                    {
+                        parent = p.Name + "->" + parent;
+                    }
+                    else
+                    {
+                        parent = p.Name;
+                    }
+                    p = p.Parent;
+                }
+
+                res = res.Replace(", in <module>", ", in [" + parent + "]");
+            }
+
+            return res;
         }
 
         public int Input0Count { get { return GetInput(0) != null ? GetInput(0).Count : 0; } }
@@ -341,15 +373,41 @@ namespace GoodAI.Modules.PythonModule
         }
 
         #region ExampleCode
-        private const string EXAMPLE_CODE = @"import math
+        private const string EXAMPLE_CODE = @"""""""
+In this example all input data are summed up,
+cosine is applied and the result is copied
+to each element of each output block.
+""""""
+
+#import math library
+import math
+
+#method called in the beginning of each simulation
 def Init():
-    print ""Init called""
+    print NodeName + "": Init called""
 
+#method called repeatedly
 def Execute():
-    #global Blackboard
-    print ""Execute called""
+    print NodeName + "": Execute called""
+    
+    #blackboard is a global comunication method, it is shared for all python nodes
+    global Blackboard
+    
+    s = 0
+    #iterate over all input blocks
+    for i in Input:
+        #iterate over each element of each block
+        s += sum(i)
+        
+    #call method from math library
+    result = math.cos(s)
 
-    Output[0] = math.cos(Input[0])
+    #iterate over all input blocks
+    for i in Input:
+        #iterate over each element of each block
+        for j in xrange(len(i)):
+            i[j] = result
+
 ";
         #endregion
     }
