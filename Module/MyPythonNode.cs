@@ -42,7 +42,7 @@ namespace GoodAI.Modules.PythonModule
 
             //load script
             var source = string.IsNullOrWhiteSpace(Owner.ExternalScript)
-                ? engine.CreateScriptSourceFromString(Owner.Script, Owner.Name)
+                ? engine.CreateScriptSourceFromString(Owner.Script, "internal script")
                 : engine.CreateScriptSourceFromFile(Owner.ExternalScript);
 
             //create default scope
@@ -224,18 +224,11 @@ namespace GoodAI.Modules.PythonModule
             {
                 res = m_PythonEngine.GetService<ExceptionOperations>().FormatException(ex);
 
-                string parent = "";
+                string parent = Name;
                 MyNodeGroup p = Parent;
                 while (p != null)
                 {
-                    if (parent != "")
-                    {
-                        parent = p.Name + "->" + parent;
-                    }
-                    else
-                    {
-                        parent = p.Name;
-                    }
+                    parent = p.Name + "->" + parent;
                     p = p.Parent;
                 }
 

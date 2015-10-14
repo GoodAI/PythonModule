@@ -1,5 +1,5 @@
 # PythonModule
- - GoodAI Brain Simulator module that provides PythonNode for executing python scripts
+ - GoodAI Brain Simulator module that provides PythonNode for executing python external/internal scripts
 
 #Prerequisities
  - [PythonTools for Visual Studio](http://microsoft.github.io/PTVS/)
@@ -8,7 +8,10 @@
 #PythonNode
  - variable number of inputs (consistent with JoinNode)
  - variable number and sizes of outputs (consistent with ForkNode)
- - user-defined python script
+ - can point to user-defined python script (ExternalScript in Node-property)
+ - or can have its own internal script (double click on the node)
+  - if ExternalScript is specified then internal script is not used
+ - Script must/may contain:
   - Settings (optional)
     - property of Python-Script-Init task
     - is executed once before Init()
@@ -28,5 +31,6 @@
 
 #Simple PythonNode example
  - add PythonNode into project
+ - set desired number of Inputs/Outputs (InputBranches/OutputbranchSpec) in Node-propery window
  - double-click on it to open internal script-editor and see example code there
  - enjoy
