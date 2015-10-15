@@ -395,8 +395,8 @@ def Execute():
     #call method from math library
     result = math.cos(s)
 
-    #iterate over all input blocks
-    for i in Input:
+    #iterate over all output blocks
+    for i in Output:
         #iterate over each element of each block
         for j in xrange(len(i)):
             i[j] = result
