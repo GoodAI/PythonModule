@@ -396,31 +396,33 @@ In this example all input data are summed up,
 cosine is applied and the result is copied
 to each element of each output block.
 """"""
-
-# import math library
+# Import math library.
 import math
 
-# method called in the beginning of each simulation
+# init() is called in the beginning of each simulation, ""node"" argument
+# has public members name, input, output, blackboard.
 def init(node):
     print node.name + "": Init called""
 
-# method called in each simulation step
+# execute() is called in each simulation step.
 def execute(node):
     print node.name + "": Execute called""
-    # node.blackboard is dictionary that is shared between nodes
+    # node.blackboard is a dictionary shared between nodes.
     
-    s = 0
-    # iterate over all input blocks
+    s = 0.0
+    # Iterate over all input blocks. (Input-block number can be
+    # set in Node Properties, their sizes depend on connected nodes.)
     for i in node.input:
-        #sum all elements of the block i
+        # Sum all elements of the block i.
         s += sum(i)
         
-    # call method from math library
+    # Call method from math library.
     result = math.cos(s)
 
-    # iterate over all output blocks
+    # Iterate over all output blocks. (Output-block number and sizes
+    # can be set in Node Properties in OutputBranchesSpec.)
     for i in node.output:
-        # iterate over each element of the block and set result
+        # Iterate over each element of the block and set result.
         for j in xrange(len(i)):
             i[j] = result
 ";
