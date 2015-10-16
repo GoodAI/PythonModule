@@ -1,5 +1,5 @@
 # PythonModule
- - GoodAI Brain Simulator module that provides PythonNode for executing python external/internal scripts
+ - GoodAI Brain Simulator module provides PythonNode for executing external or internal python scripts
 
 #Prerequisities
  - [IronPython](http://ironpython.net/)
@@ -16,15 +16,15 @@
     - is executed once before init()
     - can be used for node-specific task, like node identification
      - e.g. put in Settings [myNodeId=3] and then you can read it as a global variable in init() and execute()
-  - **init(**node**)** (mandatory)
+  - * **init(node)** * (mandatory)
     - is called once in the begining
     - can access "node" argument (see below)
-	 - *bear in mind that at this moment inputs and outputs have proper sizes but data have not been not yet received*
-  - **execute(**node**)** (mandatory)
+	 - *bear in mind that at this moment inputs and outputs have proper sizes but data have not been yet received*
+  - * **execute(node)** * (mandatory)
     - is called repeatedly in each BrainSimulator iteration to transform inputs to outputs
     - can access "node" argument (see below)
   - "**node**" argument in *init()* and *execute()*
-	 - contain members *name*, *blackboard*, *input*, *output*:
+	 - contains members *name*, *blackboard*, *input*, *output*:
       - *name* (read-only) - contains actual node-name
       - *input* (read-only) - list of vectors of floats - do not resize them, it depends on input nodes
       - *output* (write-only) - list of vectors of floats - do not resize them, it depends on *OutputBranchesSpec* in Node Properties, there you can set it.
