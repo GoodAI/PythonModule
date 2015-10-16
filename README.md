@@ -17,11 +17,11 @@
     - can be used for node-specific task, like node identification
      - e.g. put in Settings [myNodeId=3] and then you can read it as a global variable in init() and execute()
   - init(node) (mandatory)
-    - method that is mandatory
     - is called once in the begining
     - can access "node" argument (see below)
+	 - bear in mind that at this moment inputs and outputs have proper sizes but data have not been not yet received
   - execute(node) (mandatory)
-    - is called repeatedly in each BrainSimulator iteration to transform inputs to outputs.
+    - is called repeatedly in each BrainSimulator iteration to transform inputs to outputs
     - can access "node" argument (see below)
   - "node" argument in init() and execute()
 	 - contain members name, blackboard, input, output:
