@@ -16,7 +16,7 @@ using IronPython.Hosting;
 using Microsoft.Scripting.Hosting;
 using IronPython.Runtime;
 
-namespace GoodAI.Modules.PythonModule
+namespace GoodAI.Modules.Scripting
 {
     /// <summary>Initialization.</summary>
     [Description("Python-Script Init"), MyTaskInfo(OneShot = true)]
@@ -28,15 +28,13 @@ namespace GoodAI.Modules.PythonModule
 
         public override void Init(int nGPU)
         {
-            //global blackboard reset
-            if (MyPythonNode.m_Blackboard == null)
-            {
-                MyPythonNode.m_Blackboard = new IronPython.Runtime.PythonDictionary();
-            }
+            Owner.m_DataProxy.InitBlackboard();
         }
 
         public override void Execute()
         {
+            Owner.m_DataProxy.Init(Owner);
+
             //create engine
             var engine = Python.CreateEngine();
 
@@ -48,12 +46,9 @@ namespace GoodAI.Modules.PythonModule
             //create default scope
             var scope = engine.CreateScope();
 
-            //set global blackboard to each instance of script-node
-            scope.SetVariable("Blackboard", MyPythonNode.m_Blackboard);
-            scope.SetVariable("NodeName", Owner.Name);
-
-            Owner.m_PythonEngine = engine;
             Owner.m_ScriptSource = source;
+            Owner.m_PythonEngine = engine;
+            Owner.m_ScriptScope = scope;
 
             //run setting-script with scope to set initial data
             try
@@ -76,13 +71,11 @@ namespace GoodAI.Modules.PythonModule
                 MyLog.WARNING.WriteLine(Owner.ExceptionInfo(ex));
             }
             
-            Owner.m_ScriptScope = scope;
-
-            //call init
+            //call init()
             try
             {
-                var initSource = engine.CreateScriptSourceFromString(@"Init()", @"Init()");
-                initSource.Execute(scope);
+                var funcInit = scope.GetVariable(@"init");
+                engine.Operations.Invoke(funcInit, Owner.m_DataProxy);
             }
             catch (Exception ex)
             {
@@ -101,36 +94,21 @@ namespace GoodAI.Modules.PythonModule
 
         public override void Execute()
         {
-            //sync data and create inputs
-            float [][] input = new float[Owner.InputBranches][];
+            //sync data
             for(int i = 0; i < Owner.InputBranches; ++i)
             {
                 var host = Owner.GetInput(i);
-
                 host.SafeCopyToHost();
-                input[i] = host.Host;
-            }
-
-            float [][] output = new float[Owner.OutputBranches][];
-            for(int i = 0; i < Owner.OutputBranches; ++i)
-            {
-                var host = Owner.GetOutput(i);
-
-                //host.SafeCopyToHost();
-                output[i] = host.Host;
             }
 
             var scope = Owner.m_ScriptScope;
             var engine = Owner.m_PythonEngine;
 
-            scope.SetVariable("Input", input);
-            scope.SetVariable("Output", output);
-
-            //call Execute()
+            //call execute()
             try
             {
-                var executeSource = engine.CreateScriptSourceFromString(@"Execute()", @"Execute()");
-                executeSource.Execute(scope);
+                var funcInit = scope.GetVariable(@"execute");
+                engine.Operations.Invoke(funcInit, Owner.m_DataProxy);
             }
             catch (Exception ex)
             {
@@ -160,8 +138,55 @@ namespace GoodAI.Modules.PythonModule
         public ScriptSource m_ScriptSource;
         public ScriptScope m_ScriptScope;
 
-        //global comunucation channel between python-scipt nodes
-        public static PythonDictionary m_Blackboard;
+        public class Node
+        {
+            //global comunucation channel between python-scipt nodes
+            public static PythonDictionary blackboard;
+
+            //node-name
+            public string name;
+
+            public float[][] output;
+            public float[][] input;
+
+            public Node() { }
+
+            public void InitBlackboard()
+            {
+                //global blackboard init if needed
+                if (blackboard == null)
+                {
+                    blackboard = new IronPython.Runtime.PythonDictionary();
+                }
+            }
+
+            public void Init(MyPythonNode source)
+            {
+                name = source.Name;
+
+                //create lists that can be pushed into python
+                input = new float[source.InputBranches][];
+                for (int i = 0; i < source.InputBranches; ++i)
+                {
+                    input[i] = source.GetInput(i).Host;
+                }
+
+                output = new float[source.OutputBranches][];
+                for (int i = 0; i < source.OutputBranches; ++i)
+                {
+                    output[i] = source.GetOutput(i).Host;
+                }
+            }
+
+            public void CleanUp()
+            {
+                //global blackboard reset
+                blackboard = null;
+            }
+        }
+
+        //python data proxy
+        public Node m_DataProxy;
 
         //Tasks
         protected InitTask initTask { get; set; }
@@ -178,7 +203,6 @@ namespace GoodAI.Modules.PythonModule
             get { return m_ExternalScript;  }
         }
 
-
         [ReadOnly(false)]
         [YAXSerializableField, YAXElementFor("IO")]
         public override int InputBranches
@@ -192,7 +216,7 @@ namespace GoodAI.Modules.PythonModule
 
         public override string NameExpressions
         {
-            get { return "Blackboard Input Output NodeName"; }
+            get { return "blackboard input output name"; }
         }
 
         public override string Keywords
@@ -209,11 +233,12 @@ namespace GoodAI.Modules.PythonModule
         {
             InputBranches = 1;
             Script = EXAMPLE_CODE;
+            m_DataProxy = new MyPythonNode.Node();
         }
 
         public override void Cleanup()
         {
-            m_Blackboard = null;
+            m_DataProxy.CleanUp();
         }
 
         public string ExceptionInfo(Exception ex)
@@ -372,35 +397,32 @@ cosine is applied and the result is copied
 to each element of each output block.
 """"""
 
-#import math library
+# import math library
 import math
 
-#method called in the beginning of each simulation
-def Init():
-    print NodeName + "": Init called""
+# method called in the beginning of each simulation
+def init(node):
+    print node.name + "": Init called""
 
-#method called repeatedly
-def Execute():
-    print NodeName + "": Execute called""
-    
-    #blackboard is a global comunication method, it is shared for all python nodes
-    global Blackboard
+# method called in each simulation step
+def execute(node):
+    print node.name + "": Execute called""
+    # node.blackboard is dictionary that is shared between nodes
     
     s = 0
-    #iterate over all input blocks
-    for i in Input:
-        #iterate over each element of each block
+    # iterate over all input blocks
+    for i in node.input:
+        #sum all elements of the block i
         s += sum(i)
         
-    #call method from math library
+    # call method from math library
     result = math.cos(s)
 
-    #iterate over all output blocks
-    for i in Output:
-        #iterate over each element of each block
+    # iterate over all output blocks
+    for i in node.output:
+        # iterate over each element of the block and set result
         for j in xrange(len(i)):
             i[j] = result
-
 ";
         #endregion
     }
