@@ -1,7 +1,7 @@
 # PythonModule
  - GoodAI Brain Simulator module provides PythonNode for executing external or internal python scripts
 
-#Prerequisities
+#Prerequisites
  - [IronPython](http://ironpython.net/)
 
 #PythonNode
