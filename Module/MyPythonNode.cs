@@ -15,6 +15,7 @@ using System.Drawing;
 using IronPython.Hosting;
 using Microsoft.Scripting.Hosting;
 using IronPython.Runtime;
+using System.Reflection;
 
 namespace GoodAI.Modules.Scripting
 {
@@ -49,6 +50,11 @@ namespace GoodAI.Modules.Scripting
             Owner.m_ScriptSource = source;
             Owner.m_PythonEngine = engine;
             Owner.m_ScriptScope = scope;
+
+            //add library path
+            ICollection<string> Paths = engine.GetSearchPaths();
+            Paths.Add(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\Lib");
+            engine.SetSearchPaths(Paths);
 
             //run setting-script with scope to set initial data
             try
@@ -257,6 +263,7 @@ namespace GoodAI.Modules.Scripting
                     p = p.Parent;
                 }
 
+                res = res.Replace("File \"internal script\"", "[" + parent + "]");
                 res = res.Replace(", in <module>", ", in [" + parent + "]");
             }
 
