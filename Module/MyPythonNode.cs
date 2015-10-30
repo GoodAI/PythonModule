@@ -48,6 +48,7 @@ namespace GoodAI.Modules.Scripting
             var scope = engine.CreateScope();
 
             Owner.m_ScriptSource = source;
+            Owner.m_ScriptSourceName = string.IsNullOrWhiteSpace(Owner.ExternalScript) ? "internal script" : Owner.ExternalScript;
             Owner.m_PythonEngine = engine;
             Owner.m_ScriptScope = scope;
 
@@ -59,7 +60,7 @@ namespace GoodAI.Modules.Scripting
             //run setting-script with scope to set initial data
             try
             {
-                var settingSource = engine.CreateScriptSourceFromString(Settings, "Settings");
+                var settingSource = engine.CreateScriptSourceFromString(Settings, "Settings (property)");
                 settingSource.Execute(scope);
             }
             catch (Exception ex)
@@ -142,6 +143,7 @@ namespace GoodAI.Modules.Scripting
     {
         public ScriptEngine m_PythonEngine;
         public ScriptSource m_ScriptSource;
+        public string m_ScriptSourceName;
         public ScriptScope m_ScriptScope;
 
         public class Node
@@ -263,8 +265,12 @@ namespace GoodAI.Modules.Scripting
                     p = p.Parent;
                 }
 
-                res = res.Replace("File \"internal script\"", "[" + parent + "]");
-                res = res.Replace(", in <module>", ", in [" + parent + "]");
+                //res = res.Replace("File \"internal script\"", "[" + parent + "]");
+                //res = res.Replace(", in <module>", ", in [" + parent + "]");
+                //res = res.Replace("AttributeError: 'ScopeStorage'", "[" + parent + "]");
+                res = res.Replace("AttributeError: 'ScopeStorage' object", "File \"" + m_ScriptSourceName + "\"");
+                res = "[" + parent + "] " + res;
+                
             }
 
             return res;
