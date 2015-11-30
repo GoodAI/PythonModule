@@ -1,6 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Configuration  RootNamespace="NewModule">
   <KnownNodes>
-    <Node type="GoodAI.Modules.Scripting.MyPythonNode" CanBeAdded="true"/>
-  </KnownNodes>
+    <Node type="GoodAI.Modules.Scripting.MyPythonNode" CanBeAdded="true">
+      <Label>Scripting</Label>
+    </Node>
+    </KnownNodes>
 </Configuration>
