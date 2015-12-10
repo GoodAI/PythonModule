@@ -159,7 +159,14 @@ namespace GoodAI.Modules.Scripting
                     {
                         try
                         {
-                            p.GenericProxy.Value = i.Value;
+                            if (p.GenericProxy.Value is Single)
+                            {
+                                p.GenericProxy.Value = Convert.ToSingle(i.Value);
+                            }
+                            else
+                            {
+                                p.GenericProxy.Value = i.Value;
+                            }
                         }
                         catch(Exception ex)
                         {
