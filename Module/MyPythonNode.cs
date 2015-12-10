@@ -129,6 +129,49 @@ namespace GoodAI.Modules.Scripting
 
                 host.SafeCopyToDevice();
             }
+
+            //update blackboard if needed
+            UpdateDashboard();
+        }
+
+        private Core.Dashboard.DashboardProperty GetProperty(string name)
+        {
+            Core.Dashboard.GroupDashboard d = Owner.Owner.GroupedDashboard;
+            foreach(Core.Dashboard.DashboardPropertyGroup i in d.Properties)
+            {
+                if (i.PropertyName == name)
+                {
+                    return i;
+                }
+            }
+            return null;
+        }
+
+        private void UpdateDashboard()
+        {
+            if (Owner.m_DataProxy.dashboard.set != null && Owner.m_DataProxy.dashboard.set.Count > 0)
+            {
+                //TODO: not very ideal O(n^2)
+                foreach(KeyValuePair<object, object> i in Owner.m_DataProxy.dashboard.set)
+                {
+                    Core.Dashboard.DashboardProperty p = GetProperty(i.Key.ToString());
+                    if(p != null)
+                    {
+                        try
+                        {
+                            p.GenericProxy.Value = i.Value;
+                        }
+                        catch(Exception ex)
+                        {
+                            MyLog.WARNING.WriteLine(Owner.ExceptionInfo(ex) + "in dashboard[\"" + i.Key + "\"] = " + i.Value.ToString());
+                        }
+                    }
+                    else
+                    {
+                        MyLog.WARNING.WriteLine("[" + Owner.GetParents() + "] Dashboard group \"" + i.Key + "\" does not exist!");
+                    }
+                }
+            }
         }
     }
 
@@ -148,8 +191,16 @@ namespace GoodAI.Modules.Scripting
 
         public class Node
         {
+            public struct DashboardProxy
+            {
+                public PythonDictionary set;
+            };
+
             //global comunucation channel between python-scipt nodes
             public static PythonDictionary blackboard;
+
+            //dashboard change data
+            public DashboardProxy dashboard;
 
             //node-name
             public string name;
@@ -171,6 +222,7 @@ namespace GoodAI.Modules.Scripting
             public void Init(MyPythonNode source)
             {
                 name = source.Name;
+                dashboard.set = new IronPython.Runtime.PythonDictionary();
 
                 //create lists that can be pushed into python
                 input = new float[source.InputBranches][];
@@ -224,7 +276,7 @@ namespace GoodAI.Modules.Scripting
 
         public override string NameExpressions
         {
-            get { return "blackboard input output name"; }
+            get { return "node blackboard input output name dashboard"; }
         }
 
         public override string Keywords
@@ -257,13 +309,7 @@ namespace GoodAI.Modules.Scripting
             {
                 res = m_PythonEngine.GetService<ExceptionOperations>().FormatException(ex);
 
-                string parent = Name;
-                MyNodeGroup p = Parent;
-                while (p != null)
-                {
-                    parent = p.Name + "->" + parent;
-                    p = p.Parent;
-                }
+                string parent = GetParents();
 
                 //res = res.Replace("File \"internal script\"", "[" + parent + "]");
                 //res = res.Replace(", in <module>", ", in [" + parent + "]");
@@ -274,6 +320,18 @@ namespace GoodAI.Modules.Scripting
             }
 
             return res;
+        }
+
+        public string GetParents()
+        {
+            string parent = Name;
+            MyNodeGroup p = Parent;
+            while (p != null)
+            {
+                parent = p.Name + "->" + parent;
+                p = p.Parent;
+            }
+            return parent;
         }
 
         public int Input0Count { get { return GetInput(0) != null ? GetInput(0).Count : 0; } }
