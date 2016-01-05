@@ -130,28 +130,20 @@ namespace GoodAI.Modules.Scripting
                 host.SafeCopyToDevice();
             }
 
-            //update blackboard if needed
+            //update dashboard if needed
             UpdateDashboard();
         }
 
         private Core.Dashboard.DashboardProperty GetProperty(string name)
         {
-            Core.Dashboard.GroupDashboard d = Owner.Owner.GroupedDashboard;
-            foreach(Core.Dashboard.DashboardPropertyGroup i in d.Properties)
-            {
-                if (i.PropertyName == name)
-                {
-                    return i;
-                }
-            }
-            return null;
+            return Owner.Owner.GroupedDashboard.GetByName(name);
         }
 
         private void UpdateDashboard()
         {
             if (Owner.m_DataProxy.dashboard.set != null && Owner.m_DataProxy.dashboard.set.Count > 0)
             {
-                //TODO: not very ideal O(n^2)
+                //for each dash-board item and its new value we want to change try to set it
                 foreach(KeyValuePair<object, object> i in Owner.m_DataProxy.dashboard.set)
                 {
                     Core.Dashboard.DashboardProperty p = GetProperty(i.Key.ToString());
@@ -159,11 +151,12 @@ namespace GoodAI.Modules.Scripting
                     {
                         try
                         {
+                            //convert double (python works with it) to single if needed
                             if (p.GenericProxy.Value is Single)
                             {
                                 p.GenericProxy.Value = Convert.ToSingle(i.Value);
                             }
-                            else
+                            else//otherwise use directly
                             {
                                 p.GenericProxy.Value = i.Value;
                             }
