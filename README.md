@@ -1,8 +1,8 @@
 # PythonModule
- - GoodAI Brain Simulator module provides PythonNode that:
-  - runs external or internal python scripts
-  - allows changing values of dashboard variables 
-  - provides shared memory between all PythonNodes called blackboard
+ - GoodAI Brain Simulator module provides **PythonNode** that:
+  - runs external or internal **python scripts**
+  - allows changing values of **dashboard** variables 
+  - provides **shared memory** between all PythonNodes called blackboard
 
 #Prerequisites
  - [IronPython](http://ironpython.net/)
