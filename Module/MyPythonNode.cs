@@ -141,10 +141,10 @@ namespace GoodAI.Modules.Scripting
 
         private void UpdateDashboard()
         {
-            if (Owner.m_DataProxy.dashboard.set != null && Owner.m_DataProxy.dashboard.set.Count > 0)
+            if (Owner.m_DataProxy.dashboard != null && Owner.m_DataProxy.dashboard.Count > 0)
             {
                 //for each dash-board item and its new value we want to change try to set it
-                foreach(KeyValuePair<object, object> i in Owner.m_DataProxy.dashboard.set)
+                foreach(KeyValuePair<object, object> i in Owner.m_DataProxy.dashboard)
                 {
                     Core.Dashboard.DashboardProperty p = GetProperty(i.Key.ToString());
                     if(p != null)
@@ -191,16 +191,11 @@ namespace GoodAI.Modules.Scripting
 
         public class Node
         {
-            public struct DashboardProxy
-            {
-                public PythonDictionary set;
-            };
-
             //global comunucation channel between python-scipt nodes
             public static PythonDictionary blackboard;
 
             //dashboard change data
-            public DashboardProxy dashboard;
+            public PythonDictionary dashboard;
 
             //node-name
             public string name;
@@ -222,7 +217,7 @@ namespace GoodAI.Modules.Scripting
             public void Init(MyPythonNode source)
             {
                 name = source.Name;
-                dashboard.set = new IronPython.Runtime.PythonDictionary();
+                dashboard = new IronPython.Runtime.PythonDictionary();
 
                 //create lists that can be pushed into python
                 input = new float[source.InputBranches][];
