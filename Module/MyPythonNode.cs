@@ -129,6 +129,49 @@ namespace GoodAI.Modules.Scripting
 
                 host.SafeCopyToDevice();
             }
+
+            //update dashboard if needed
+            UpdateDashboard();
+        }
+
+        private Core.Dashboard.DashboardProperty GetProperty(string name)
+        {
+            return Owner.Owner.GroupedDashboard.GetByName(name);
+        }
+
+        private void UpdateDashboard()
+        {
+            if (Owner.m_DataProxy.dashboard != null && Owner.m_DataProxy.dashboard.Count > 0)
+            {
+                //for each dash-board item and its new value we want to change try to set it
+                foreach(KeyValuePair<object, object> i in Owner.m_DataProxy.dashboard)
+                {
+                    Core.Dashboard.DashboardProperty p = GetProperty(i.Key.ToString());
+                    if(p != null)
+                    {
+                        try
+                        {
+                            //convert double (python works with it) to single if needed
+                            if (p.GenericProxy.Value is Single)
+                            {
+                                p.GenericProxy.Value = Convert.ToSingle(i.Value);
+                            }
+                            else//otherwise use directly
+                            {
+                                p.GenericProxy.Value = i.Value;
+                            }
+                        }
+                        catch(Exception ex)
+                        {
+                            MyLog.WARNING.WriteLine(Owner.ExceptionInfo(ex) + "in dashboard[\"" + i.Key + "\"] = " + i.Value.ToString());
+                        }
+                    }
+                    else
+                    {
+                        MyLog.WARNING.WriteLine("[" + Owner.GetParents() + "] Dashboard group \"" + i.Key + "\" does not exist!");
+                    }
+                }
+            }
         }
     }
 
@@ -151,6 +194,9 @@ namespace GoodAI.Modules.Scripting
             //global comunucation channel between python-scipt nodes
             public static PythonDictionary blackboard;
 
+            //dashboard change data
+            public PythonDictionary dashboard;
+
             //node-name
             public string name;
 
@@ -171,6 +217,7 @@ namespace GoodAI.Modules.Scripting
             public void Init(MyPythonNode source)
             {
                 name = source.Name;
+                dashboard = new IronPython.Runtime.PythonDictionary();
 
                 //create lists that can be pushed into python
                 input = new float[source.InputBranches][];
@@ -224,7 +271,7 @@ namespace GoodAI.Modules.Scripting
 
         public override string NameExpressions
         {
-            get { return "blackboard input output name"; }
+            get { return "node blackboard input output name dashboard"; }
         }
 
         public override string Keywords
@@ -257,13 +304,7 @@ namespace GoodAI.Modules.Scripting
             {
                 res = m_PythonEngine.GetService<ExceptionOperations>().FormatException(ex);
 
-                string parent = Name;
-                MyNodeGroup p = Parent;
-                while (p != null)
-                {
-                    parent = p.Name + "->" + parent;
-                    p = p.Parent;
-                }
+                string parent = GetParents();
 
                 //res = res.Replace("File \"internal script\"", "[" + parent + "]");
                 //res = res.Replace(", in <module>", ", in [" + parent + "]");
@@ -274,6 +315,18 @@ namespace GoodAI.Modules.Scripting
             }
 
             return res;
+        }
+
+        public string GetParents()
+        {
+            string parent = Name;
+            MyNodeGroup p = Parent;
+            while (p != null)
+            {
+                parent = p.Name + "->" + parent;
+                p = p.Parent;
+            }
+            return parent;
         }
 
         public int Input0Count { get { return GetInput(0) != null ? GetInput(0).Count : 0; } }

@@ -1,5 +1,8 @@
 # PythonModule
- - GoodAI Brain Simulator module provides PythonNode for executing external or internal python scripts
+ - GoodAI Brain Simulator module provides **PythonNode** that:
+  - runs external or internal **python scripts**
+  - allows changing values of **dashboard** variables 
+  - provides **shared memory** between all PythonNodes called blackboard
 
 #Prerequisites
  - [IronPython](http://ironpython.net/)
@@ -24,11 +27,12 @@
     - is called repeatedly in each BrainSimulator iteration to transform inputs to outputs
     - can access "node" argument (see below)
   - "**node**" argument in *init()* and *execute()*
-	 - contains members *name*, *blackboard*, *input*, *output*:
+	 - contains members *name*, *blackboard*, *input*, *output*, *dashboard*:
       - *name* (read-only) - contains actual node-name
       - *input* (read-only) - list of vectors of floats - do not resize them, it depends on input nodes
       - *output* (write-only) - list of vectors of floats - do not resize them, it depends on *OutputBranchesSpec* in Node Properties, there you can set it.
       - *blackboard* (read-write) - dictionary that is shared between all python nodes
+      - *dashboard* (write-only) - dictionary, if filled by Key:Value pairs then each dashboard variable Key will be set to Value
 
 #Simple PythonNode example
  - add *PythonNode* into project
@@ -36,3 +40,4 @@
  - double-click on it to open internal script-editor and see example code there
  - connect some node to its input(s)
  - enjoy
+
