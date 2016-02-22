@@ -366,7 +366,7 @@ namespace GoodAI.Modules.Scripting
                     {
                         MyMemoryBlock<float> mb = MyMemoryManager.Instance.CreateMemoryBlock<float>(this);
                         mb.Name = "Output_" + (i + 1);
-                        mb.Count = -1;
+                        mb.Count = 0;
                         m_outputs[i] = mb;
                     }
                 }
