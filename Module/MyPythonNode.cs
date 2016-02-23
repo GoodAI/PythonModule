@@ -171,6 +171,9 @@ namespace GoodAI.Modules.Scripting
                         MyLog.WARNING.WriteLine("[" + Owner.GetParents() + "] Dashboard group \"" + i.Key + "\" does not exist!");
                     }
                 }
+
+                //clear
+                Owner.m_DataProxy.dashboard.Clear();
             }
         }
     }
